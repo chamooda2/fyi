@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player with Scrollable Video List</title>
+    <style>
+        /* Overall page styling to give a theatre-like vibe */
+        body {
+            background-color: #121212;  /* Dark background for a cinematic look */
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #156da1; /* Warm color for contrast */
+            text-shadow: 2px 2px 8px rgba(71, 74, 255, 0.5); /* Glow effect for cinematic look */
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Video player styling */
+        video {
+            width: 100%;
+            max-width: 1200px;
+            max-height: 1200px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7); /* Shadow for depth */
+            margin-bottom: 20px;
+        }
+
+        /* Scrollable video list inside hamburger menu */
+        .video-list {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background-color: #1a1a1a;
+            width: 200px;
+            max-height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .video-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            color: #156da1;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .video-item:hover {
+            background-color: #156da1;
+            transform: scale(1.05);
+            color: #fff;
+        }
+
+        .selected {
+            background-color: #156da1;
+            color: #000;
+        }
+
+        /* Play/Pause button */
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: #156da1;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        button:hover {
+            background-color: #156da1;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        button:active {
+            background-color: #156da1;
+        }
+
+        /* Container to center elements */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Hamburger menu styling */
+        .hamburger {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .bar {
+            width: 35px;
+            height: 5px;
+            background-color: #156da1;
+            margin: 6px 0;
+            transition: 0.4s;
+        }
+
+        /* Logo styling */
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .logo img {
+            width: 100px;
+            height: auto;
+        }
+
+        /* Show/Hide video list */
+        .video-list.show {
+            display: block;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content input {
+            padding: 10px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .modal-content button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: #156da1;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .modal-content button:hover {
+            background-color: #156da1;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Company logo at the top left -->
+    <div class="logo">
+        <img src="image.png" alt="Company Logo">
+    </div>
+
+    <h1>Wolf Of D-Street</h1>
+
+    <div class="container">
+        <video id="videoPlayer" controls>
+            <source src="videos\vid1.mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <div>
+            <button id="playPauseBtn">Pause</button>
+        </div>
+    </div>
+
+    <!-- Hamburger menu for video list -->
+    <div class="hamburger" id="hamburgerMenu">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+
+    <!-- Scrollable video list inside the hamburger menu -->
+    <div class="video-list" id="videoList">
+        <div class="video-item" data-video="videos\vid1.mp4">Video 1</div>
+        <div class="video-item" data-video="videos\vid2.mp4">Video 2</div>
+        <div class="video-item" data-video="videos\vid3.mp4">Video 3</div>
+        <div class="video-item" data-video="videos\vid4.mp4">Video 4</div>
+        <div class="video-item" data-video="videos\vid5.mp4">Video 5</div>
+        <div class="video-item" data-video="videos\vid6.mp4">Video 6</div>
+        <div class="video-item" data-video="videos\vid7.mp4">Video 7</div>
+        <div class="video-item" data-video="videos\vid8.mp4">Video 8</div>
+        <div class="video-item" data-video="videos\vid9.mp4">Video 9</div>
+        <div class="video-item" data-video="videos\vid10.mp4">Video 10</div>
+    </div>
+
+    <!-- Modal for password input -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <p>Please enter the password to play this video:</p>
+            <input type="password" id="passwordInput" placeholder="Enter password">
+            <br>
+            <button id="submitPasswordBtn">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const videoItems = document.querySelectorAll('.video-item');
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const videoList = document.getElementById('videoList');
+        const passwordModal = document.getElementById('passwordModal');
+        const passwordInput = document.getElementById('passwordInput');
+        const submitPasswordBtn = document.getElementById('submitPasswordBtn');
+        const correctPassword = "fyi@123"; // Set the correct password
+
+        let selectedVideoSource = ""; // Store the selected video source
+
+        // Function to toggle play and pause
+        playPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playPauseBtn.textContent = 'Pause';
+            } else {
+                video.pause();
+                playPauseBtn.textContent = 'Play';
+            }
+        });
+
+        // Disable seeking
+        video.addEventListener('seeking', function() {
+            video.currentTime = video.seekingTime;
+        });
+
+        video.addEventListener('timeupdate', function() {
+            video.seekingTime = video.currentTime;
+        });
+
+        video.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+                event.preventDefault();
+            }
+        });
+
+        // Handle video selection from the list
+        videoItems.forEach(item => {
+            item.addEventListener('click', function() {
+                selectedVideoSource = this.getAttribute('data-video');
+                passwordModal.style.display = 'flex';  // Show the modal
+            });
+        });
+
+        // Handle password submission
+        submitPasswordBtn.addEventListener('click', function() {
+            const enteredPassword = passwordInput.value;
+
+            if (enteredPassword === correctPassword) {
+                // Update the video source if password is correct
+                video.querySelector('source').setAttribute('src', selectedVideoSource);
+                video.load();  // Reload the video to play the selected one
+
+                // Play the new video
+                video.play();
+                playPauseBtn.textContent = 'Pause';
+
+                // Hide the modal after success
+                passwordModal.style.display = 'none';
+                passwordInput.value = ''; // Clear the input field
+            } else {
+                // Show error message if password is incorrect
+                alert("Incorrect password. You cannot play this video.");
+            }
+        });
+
+        // Toggle the video list when hamburger menu is clicked
+        hamburgerMenu.addEventListener('click', () => {
+            videoList.classList.toggle('show');
+        });
+    </script>
+</body>
+</html>
